@@ -3,6 +3,21 @@ import os
 import numpy as np
 import os
 
+from PyQt6 import QtWidgets
+from ui import Ui_MainWindow
+
+class ToolWindow(QtWidgets.QMainWindow, Ui_MainWindow.Ui_MainWindow):
+    def __init__(self,parent=None):
+        super(ToolWindow, self).__init__(parent)
+
+    def showFileDialog(self):
+        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, "打开文件", os.getcwd(), "All Images(*.jpg;*jpge;*.png;*.raw);;PNG(*.png);;RAW(*.raw);;JEPE(*.jpg;*jpge)")
+        print(fileName)
+    
+    def initUI(self, MainWindow):
+        self.setupUi(MainWindow)
+        self.pushButton_output.clicked.connect(self.showFileDialog)
+
 # 等分
 rows = 16
 cols = 16
@@ -22,9 +37,6 @@ def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
-
-def main():
-    pass
 
 
 def loadFile():
@@ -76,7 +88,13 @@ def handleJPG():
 
 
 def saveFile():
-
+    pass
 
 if __name__ == '__main__':
-    main()
+    import sys
+    app = QtWidgets.QApplication(sys.argv)
+    MainWindow = QtWidgets.QMainWindow()
+    ui = ToolWindow()
+    ui.initUI(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec())
