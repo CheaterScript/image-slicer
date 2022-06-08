@@ -2,93 +2,174 @@ import cv2
 import os
 import numpy as np
 import os
+import stat
+import time
+from pathlib import Path
 
-from PyQt6 import QtWidgets
-from ui import Ui_MainWindow
+from PyQt6 import QtWidgets, QtCore
+from PyQt6.QtGui import QGuiApplication
+from ui.Ui_MainWindow import Ui_MainWindow
 
-class ToolWindow(QtWidgets.QMainWindow, Ui_MainWindow.Ui_MainWindow):
-    def __init__(self,parent=None):
-        super(ToolWindow, self).__init__(parent)
-
-    def showFileDialog(self):
-        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, "打开文件", os.getcwd(), "All Images(*.jpg;*jpge;*.png;*.raw);;PNG(*.png);;RAW(*.raw);;JEPE(*.jpg;*jpge)")
-        print(fileName)
-    
-    def initUI(self, MainWindow):
-        self.setupUi(MainWindow)
-        self.pushButton_output.clicked.connect(self.showFileDialog)
-
-# 等分
-rows = 16
-cols = 16
-
-# 要处理的文件路径
-img_path = './input.raw'
-# 输出文件名
-output_name = 'image'
-# 输出文件存放路径
-output_path = './output/'
+from tools.raw_processer import Raw
+from tools.png_processer import PNG
+from tools.jpg_processer import JPG
 
 # 支持的格式, 不在其中的会跳过处理
 FILE_TYPES = ('.jpg', '.jpge', '.png', '.raw')
 
 
-def mkdir(path):
-    if not os.path.exists(path):
-        os.makedirs(path)
+class ToolWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    def __init__(self, parent=None):
+        super(ToolWindow, self).__init__(parent)
 
+    def openFile(self):
+        fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, "打开文件", os.getcwd(
+        ), "All Images(*.jpg;*jpge;*.png;*.raw);;PNG(*.png);;RAW(*.raw);;JEPE(*.jpg;*jpge)")
 
+        self.lineEdit_input.setText(fileName)
 
-def loadFile():
-    _, extension_name = os.path.splitext(img_path)
-    extension_name = extension_name.lower()
-    if extension_name not in FILE_TYPES:
-        raise Exception("文件验证失败：" + i)
-    if extension_name == '.tga':
-        img = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
-        if img is None:
-            raise Exception("文件验证失败：" + i)
-    else:
-        img = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
-        if img is None:
-            raise Exception("文件验证失败：" + i)
+    def ouputDir(self):
+        dirPath = QtWidgets.QFileDialog.getExistingDirectory(
+            self, "选择输出路径", os.getcwd())
+        self.lineEdit_output.setText(dirPath)
 
+    def center(self):
+        screen = QGuiApplication.screenAt(QtCore.QPoint(
+            self.frameGeometry().x(), self.frameGeometry().y()))
+        qr = self.frameGeometry()
+        cp = screen.availableGeometry().center()
+        qr.moveCenter(cp)
+        self.move(qr.topLeft())
 
-def handleRAW():
-    # img = cv2.imread(img_path)
-    img = np.fromfile(img_path, dtype=np.uint8)
-    img = img.reshape((65536, 65536, 3))
-    shape = img.shape
-    # _, ExtensionName = os.path.splitext(img_path)
-    singleWidth = int(shape[0] / cols)
-    singleHeight = int(shape[1] / rows)
+    def initUI(self, MainWindow):
+        self.setupUi(MainWindow)
+        self.pushButton_start = self.pushButton_3
+        self.center()
 
-    mkdir(output_path)
+        # 打开文件
+        self.pushButton_input.clicked.connect(self.openFile)
+        # self.pushButton_input.clicked.connect(self.test)
+        # 输出目录
+        self.pushButton_output.clicked.connect(self.ouputDir)
+        # 开始处理
+        self.pushButton_start.clicked.connect(self.start)
 
-    for i in range(rows):
-        for j in range(cols):
-            print("正在处理%d/%d张……" % (i*rows+j / rows*cols))
-            x = j * singleWidth
-            y = i * singleHeight
-            print("%d_%d" % (x, y))
-            new_img = cv2.cvtColor(
-                img[y:y+singleHeight, x: x+singleWidth], cv2.COLOR_BGR2RGB)
-            cv2.imwrite("%s%s_%03d%s" %
-                        (output_path, output_name, i*singleHeight+j, ".jpg"), new_img)
+    def setIsEnabled(self, isEnabled):
+        self.lineEdit_input.setEnabled(isEnabled)
+        self.lineEdit_output.setEnabled(isEnabled)
+        self.pushButton_input.setEnabled(isEnabled)
+        self.pushButton_output.setEnabled(isEnabled)
+        self.lineEdit_row.setEnabled(isEnabled)
+        self.lineEdit_col.setEnabled(isEnabled)
+        self.pushButton_start.setEnabled(isEnabled)
+        # 等分
 
-    print('处理完成')
+    def start(self):
+        if(self.checkInput() == False):
+            return
 
+        # 禁用所有控件
+        self.setIsEnabled(False)
+        # 隐藏开始按钮
+        self.pushButton_start.setVisible(False)
+        # 显示进度条
+        self.progressBar.setVisible(True)
+        self.progressBar.setValue(0)
 
-def handlePNG():
-    pass
+        self.handle()
 
+    def complete(self):
+        self.pushButton_start.setVisible(True)
+        self.progressBar.setVisible(False)
+        self.setIsEnabled(True)
 
-def handleJPG():
-    pass
+    def test(self):
+        QtWidgets.QMessageBox.warning(
+            self, "提示", "输入文件不存在或类型错误！")
 
+    def checkInput(self):
+        inputPath = Path(self.lineEdit_input.text())
+        outputPath = Path(self.lineEdit_output.text())
 
-def saveFile():
-    pass
+        if not inputPath.is_file() or inputPath.suffix not in FILE_TYPES:
+            QtWidgets.QMessageBox.warning(
+                self, "提示", "输入文件不存在或类型错误！")
+            return False
+        if not outputPath.is_dir():
+            QtWidgets.QMessageBox.warning(
+                self, "提示", "输出目录不存在！")
+            return False
+        # print(os.access(outputPath, os.X_OK | os.R_OK | os.X_OK | os.F_OK))
+        # print(os.access(outputPath, os.R_OK))
+        if not os.access(self.lineEdit_output.text(), os.W_OK):
+            print(os.access(outputPath, os.X_OK))
+            QtWidgets.QMessageBox.warning(
+                self, "提示", "输出目录没有写入权限，请重新选择！")
+            return False
+
+        # os.chmod(outputPath, stat.S_IWRITE)
+        try:
+            f = open(self.lineEdit_output.text() + '/test.txt', 'w')
+            f.close()
+            os.remove(self.lineEdit_output.text() + '/test.txt')
+        except PermissionError:
+            QtWidgets.QMessageBox.warning(
+                self, "提示", "输出目录没有写入权限，请重新选择！")
+            return False
+
+        try:
+            row = int(self.lineEdit_row.text())
+        except ValueError as e:
+            QtWidgets.QMessageBox.warning(
+                self, "提示", "行数不是一个整数！")
+            return False
+
+        try:
+            col = int(self.lineEdit_col.text())
+        except ValueError as e:
+            QtWidgets.QMessageBox.warning(
+                self, "提示", "列数不是一个整数！")
+            return False
+
+        return True
+
+    def showProgress(self, value):
+        self.progressBar.setValue(value)
+
+    def handle(self):
+        inputPath = self.lineEdit_input.text()
+        outputPath = self.lineEdit_output.text()
+        row = int(self.lineEdit_row.text())
+        col = int(self.lineEdit_col.text())
+
+        _, extension_name = os.path.splitext(inputPath)
+        extension_name = extension_name.lower()
+        if extension_name not in FILE_TYPES:
+            raise Exception("文件打开失败")
+        if extension_name == '.raw':
+            processer = Raw(inputPath, outputPath, row, col)
+        if extension_name == '.png':
+            processer = PNG(inputPath, outputPath, row, col)
+        if extension_name == '.jpg' or extension_name == '.jpge':
+            processer = JPG(inputPath, outputPath, row, col)
+
+        if not processer:
+            self.complete()
+            return
+
+        processer.update.connect(self.showProgress)
+
+        time.sleep(0.5)
+
+        processer.slice()
+
+        time.sleep(0.5)
+
+        QtWidgets.QMessageBox.information(
+            self, "处理完成提示", "恭喜，处理完成！")
+
+        self.complete()
+
 
 if __name__ == '__main__':
     import sys

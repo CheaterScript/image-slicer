@@ -1,0 +1,26 @@
+altgraph==0.17.2
+autopep8 @ file:///opt/conda/conda-bld/autopep8_1650463822033/work
+certifi==2022.5.18.1
+click==7.1.2
+future==0.18.2
+mkl-fft==1.3.1
+mkl-random @ file:///C:/ci/mkl_random_1626186184308/work
+mkl-service==2.4.0
+numpy @ file:///C:/ci/numpy_and_numpy_base_1652784039997/work
+opencv-python==4.5.5.64
+pefile==2022.5.30
+pycodestyle @ file:///tmp/build/80754af9/pycodestyle_1636635402688/work
+pyinstaller==5.1
+pyinstaller-hooks-contrib==2022.7
+PyQt6==6.3.0
+pyqt6-plugins==6.1.0.2.2
+PyQt6-Qt6==6.3.0
+PyQt6-sip==13.3.1
+pyqt6-tools==6.1.0.3.2
+python-dotenv==0.20.0
+pywin32-ctypes==0.2.0
+qt6-applications==6.1.0.2.2
+qt6-tools==6.1.0.1.2
+six @ file:///tmp/build/80754af9/six_1644875935023/work
+toml @ file:///tmp/build/80754af9/toml_1616166611790/work
+wincertstore==0.2

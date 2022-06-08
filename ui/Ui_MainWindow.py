@@ -9,14 +9,17 @@
 from PyQt6 import QtCore, QtGui, QtWidgets
 from pathlib import Path
 
+
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(666, 377)
-        sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
+        sizePolicy = QtWidgets.QSizePolicy(
+            QtWidgets.QSizePolicy.Policy.Preferred, QtWidgets.QSizePolicy.Policy.Preferred)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
+        sizePolicy.setHeightForWidth(
+            MainWindow.sizePolicy().hasHeightForWidth())
         MainWindow.setSizePolicy(sizePolicy)
         MainWindow.setWindowOpacity(1.0)
         MainWindow.setFixedSize(MainWindow.width(), MainWindow.height())
@@ -91,9 +94,11 @@ class Ui_MainWindow(object):
         self.groupBox_2.setGeometry(QtCore.QRect(20, 150, 621, 91))
         self.groupBox_2.setObjectName("groupBox_2")
         self.horizontalLayoutWidget_2 = QtWidgets.QWidget(self.groupBox_2)
-        self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(20, 30, 141, 31))
+        self.horizontalLayoutWidget_2.setGeometry(
+            QtCore.QRect(20, 30, 141, 31))
         self.horizontalLayoutWidget_2.setObjectName("horizontalLayoutWidget_2")
-        self.horizontalLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_2)
+        self.horizontalLayout = QtWidgets.QHBoxLayout(
+            self.horizontalLayoutWidget_2)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.label_3 = QtWidgets.QLabel(self.horizontalLayoutWidget_2)
@@ -109,9 +114,11 @@ class Ui_MainWindow(object):
         self.lineEdit_row.setObjectName("lineEdit_row")
         self.horizontalLayout.addWidget(self.lineEdit_row)
         self.horizontalLayoutWidget_4 = QtWidgets.QWidget(self.groupBox_2)
-        self.horizontalLayoutWidget_4.setGeometry(QtCore.QRect(200, 30, 141, 31))
+        self.horizontalLayoutWidget_4.setGeometry(
+            QtCore.QRect(200, 30, 141, 31))
         self.horizontalLayoutWidget_4.setObjectName("horizontalLayoutWidget_4")
-        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_4)
+        self.horizontalLayout_3 = QtWidgets.QHBoxLayout(
+            self.horizontalLayoutWidget_4)
         self.horizontalLayout_3.setContentsMargins(0, 0, 0, 0)
         self.horizontalLayout_3.setObjectName("horizontalLayout_3")
         self.label_5 = QtWidgets.QLabel(self.horizontalLayoutWidget_4)
@@ -148,13 +155,12 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "大图片切割工具"))
+        MainWindow.setWindowTitle(_translate(
+            "MainWindow", "大图片切割工具 - LookingAI.com"))
         self.groupBox.setTitle(_translate("MainWindow", "文件配置"))
         self.label_2.setText(_translate("MainWindow", "输入文件："))
-        self.lineEdit_input.setText(_translate("MainWindow", "asdasdasd"))
         self.pushButton_input.setText(_translate("MainWindow", "浏览"))
         self.label.setText(_translate("MainWindow", "输出目录："))
-        self.lineEdit_output.setText(_translate("MainWindow", "asdasdasd"))
         self.pushButton_output.setText(_translate("MainWindow", "浏览"))
         self.pushButton_3.setText(_translate("MainWindow", "开始处理"))
         self.groupBox_2.setTitle(_translate("MainWindow", "参数配置"))
