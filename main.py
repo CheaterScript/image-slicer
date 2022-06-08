@@ -1,3 +1,4 @@
+from unittest import result
 import cv2
 import os
 import numpy as np
@@ -10,6 +11,7 @@ from PyQt6 import QtWidgets, QtCore
 from PyQt6.QtGui import QGuiApplication
 from tools.tiff_processer import TIFF
 from ui.Ui_MainWindow import Ui_MainWindow
+from ui.inputDialog import Ui_Dialog
 
 from tools.raw_processer import Raw
 from tools.png_processer import PNG
@@ -34,6 +36,39 @@ class ToolWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self, "选择输出路径", os.getcwd())
         self.lineEdit_output.setText(dirPath)
 
+    def showInputDialog(self):
+        if self.inputDialog.exec() == 1:
+            return True
+        else:
+            return False
+
+    def checkRawInput(self):
+        # width = int(self.inputDialogUI.lineEdit_width.text())
+        # height = int(self.inputDialogUI.lineEdit_height.text())
+        # channels = int(self.inputDialogUI.lineEdit_channels.text())
+        try:
+            width = int(self.inputDialogUI.lineEdit_width.text())
+        except ValueError as e:
+            QtWidgets.QMessageBox.warning(
+                self, "提示", "Raw宽度不是一个整数！")
+            return False
+        
+        try:
+            width = int(self.inputDialogUI.lineEdit_width.text())
+        except ValueError as e:
+            QtWidgets.QMessageBox.warning(
+                self, "提示", "Raw宽度不是一个整数！")
+            return False
+
+        try:
+            width = int(self.inputDialogUI.lineEdit_width.text())
+        except ValueError as e:
+            QtWidgets.QMessageBox.warning(
+                self, "提示", "Raw通道不是一个整数！")
+            return False
+
+        return True
+
     def center(self):
         screen = QGuiApplication.screenAt(QtCore.QPoint(
             self.frameGeometry().x(), self.frameGeometry().y()))
@@ -46,6 +81,11 @@ class ToolWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(MainWindow)
         self.pushButton_start = self.pushButton_3
         self.center()
+
+        self.inputDialog = QtWidgets.QDialog(self)
+        self.inputDialogUI = Ui_Dialog()
+        self.inputDialogUI.setupUi(self.inputDialog)
+
 
         # 打开文件
         self.pushButton_input.clicked.connect(self.openFile)
@@ -68,7 +108,21 @@ class ToolWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def start(self):
         if(self.checkInput() == False):
             return
+        
+        inputPath = self.lineEdit_input.text()
+        _, extension_name = os.path.splitext(inputPath)
+        extension_name = extension_name.lower()
 
+        if extension_name == '.raw':
+            result = self.showInputDialog()
+            if not result:
+                return
+            if self.checkRawInput() == False:
+                return
+        
+        self.handle()
+
+    def handle(self):
         # 禁用所有控件
         self.setIsEnabled(False)
         # 隐藏开始按钮
@@ -148,7 +202,10 @@ class ToolWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if extension_name not in FILE_TYPES:
             raise Exception("文件打开失败")
         if extension_name == '.raw':
-            processer = Raw(inputPath, outputPath, row, col)
+            width = int(self.inputDialogUI.lineEdit_width.text())
+            height = int(self.inputDialogUI.lineEdit_height.text())
+            channels = int(self.inputDialogUI.lineEdit_channels.text())
+            processer = Raw(inputPath, outputPath, row, col,(height, width, channels))
         if extension_name == '.png':
             processer = PNG(inputPath, outputPath, row, col)
         if extension_name == '.jpg' or extension_name == '.jpge':
@@ -164,12 +221,16 @@ class ToolWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         time.sleep(0.5)
 
-        processer.slice()
+        result = processer.slice()
 
-        time.sleep(0.5)
+        if isinstance(result, str):
+            QtWidgets.QMessageBox.information(
+                self, "提示", result)
+        else:
+            time.sleep(0.5)
 
-        QtWidgets.QMessageBox.information(
-            self, "处理完成提示", "恭喜，处理完成！")
+            QtWidgets.QMessageBox.information(
+                self, "处理完成提示", "恭喜，处理完成！")
 
         self.complete()
 

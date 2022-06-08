@@ -37,6 +37,6 @@ class TIFF(Processer):
                 print("正在处理%d/%d张……" % (i*self.rows+j, total))
 
     def save(self, img, index) -> None:
-        cv2.imencode(self.inputPath.suffix, img, [int(cv2.IMWRITE_JPEG_QUALITY), 100])[
+        cv2.imencode('.jpg', img, [int(cv2.IMWRITE_JPEG_QUALITY), 100])[
             1].tofile("%s/%s_%03d%s" %
                       (self.output, self.inputPath.stem, index, '.jpg'))

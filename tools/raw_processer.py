@@ -7,13 +7,20 @@ import numpy as np
 
 
 class Raw(Processer):
+    def __init__(self, input, output, rows, cols, shape) -> None:
+        super().__init__(input, output, rows, cols)
+        self.shape = shape
+
     def load(self) -> None:
         self.img = np.fromfile(self.input, dtype=np.uint8)
-        self.img = self.img.reshape((65536, 65536, 3))
         self.inputPath = Path(self.input)
 
     def slice(self) -> None:
         self.load()
+        try:
+            self.img = self.img.reshape(self.shape)
+        except ValueError as e:
+            return "宽高或通道数与Raw文件大小不匹配！"
         total = self.rows * self.cols
         shape = self.img.shape
         singleWidth = math.ceil(shape[0] / self.cols)
@@ -37,7 +44,8 @@ class Raw(Processer):
                 self.save(new_img, i*self.rows+j)
                 print("正在处理%d/%d张……" % (i*self.rows+j, total))
 
+        return False
     def save(self, img, index) -> None:
-        cv2.imencode(self.inputPath.suffix, img, [int(cv2.IMWRITE_JPEG_QUALITY), 100])[
+        cv2.imencode('.jpg', img, [int(cv2.IMWRITE_JPEG_QUALITY), 100])[
             1].tofile("%s/%s_%03d%s" %
                       (self.output, self.inputPath.stem, index, '.jpg'))

@@ -163,7 +163,7 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "输出目录："))
         self.pushButton_output.setText(_translate("MainWindow", "浏览"))
         self.pushButton_3.setText(_translate("MainWindow", "开始处理"))
-        self.groupBox_2.setTitle(_translate("MainWindow", "参数配置"))
+        self.groupBox_2.setTitle(_translate("MainWindow", "切割参数配置"))
         self.label_3.setText(_translate("MainWindow", "行数:"))
         self.label_5.setText(_translate("MainWindow", "列数:"))
         self.label_6.setText(_translate("MainWindow", "×"))
