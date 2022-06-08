@@ -8,6 +8,7 @@ from pathlib import Path
 
 from PyQt6 import QtWidgets, QtCore
 from PyQt6.QtGui import QGuiApplication
+from tools.tiff_processer import TIFF
 from ui.Ui_MainWindow import Ui_MainWindow
 
 from tools.raw_processer import Raw
@@ -15,7 +16,7 @@ from tools.png_processer import PNG
 from tools.jpg_processer import JPG
 
 # 支持的格式, 不在其中的会跳过处理
-FILE_TYPES = ('.jpg', '.jpge', '.png', '.raw')
+FILE_TYPES = ('.jpg', '.jpge', '.png', '.raw', '.tif', '.tiff')
 
 
 class ToolWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -24,7 +25,7 @@ class ToolWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def openFile(self):
         fileName, _ = QtWidgets.QFileDialog.getOpenFileName(self, "打开文件", os.getcwd(
-        ), "All Images(*.jpg;*jpge;*.png;*.raw);;PNG(*.png);;RAW(*.raw);;JEPE(*.jpg;*jpge)")
+        ), "All Images(*.jpg;*jpge;*.png;*.raw;*.tiff;*.tif);;PNG(*.png);;Photoshop RAW(*.raw);;JEPE(*.jpg;*jpge);;TIFF(*.tif;*.tiff)")
 
         self.lineEdit_input.setText(fileName)
 
@@ -152,6 +153,8 @@ class ToolWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             processer = PNG(inputPath, outputPath, row, col)
         if extension_name == '.jpg' or extension_name == '.jpge':
             processer = JPG(inputPath, outputPath, row, col)
+        if extension_name == '.tif' or extension_name == '.tiff':
+            processer = TIFF(inputPath, outputPath, row, col)
 
         if not processer:
             self.complete()

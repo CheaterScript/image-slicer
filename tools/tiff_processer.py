@@ -6,7 +6,7 @@ from PyQt6 import QtWidgets
 import numpy as np
 
 
-class PNG(Processer):
+class TIFF(Processer):
     def load(self) -> None:
         self.img = cv2.imdecode(np.fromfile(
             self.input, dtype=np.uint8), cv2.IMREAD_UNCHANGED)
@@ -37,6 +37,6 @@ class PNG(Processer):
                 print("正在处理%d/%d张……" % (i*self.rows+j, total))
 
     def save(self, img, index) -> None:
-        cv2.imencode(self.inputPath.suffix, img, [int(cv2.IMWRITE_PNG_COMPRESSION), 0])[
+        cv2.imencode(self.inputPath.suffix, img, [int(cv2.IMWRITE_JPEG_QUALITY), 100])[
             1].tofile("%s/%s_%03d%s" %
-                      (self.output, self.inputPath.stem, index, self.inputPath.suffix))
+                      (self.output, self.inputPath.stem, index, '.jpg'))
