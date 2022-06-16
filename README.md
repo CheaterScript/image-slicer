@@ -1,5 +1,5 @@
 # image-slicer
-Slicer for Large images
+Slicer for large images.
 
 ## Installation from source
 
